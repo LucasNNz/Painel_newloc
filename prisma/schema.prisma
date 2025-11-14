@@ -1,0 +1,61 @@
+
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/portal_newloc/nextjs_space/node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model UsuariosPortal {
+  id         String   @id @default(uuid()) @db.Uuid
+  email      String   @unique
+  senhaHash  String   @map("senha_hash")
+  cliente    String?
+  tipo       TipoUsuario
+  ativo      Boolean  @default(true)
+  criadoEm   DateTime @default(now()) @map("criado_em")
+  
+  sessions SessionsPortal[]
+  
+  @@map("usuarios_portal")
+}
+
+model SessionsPortal {
+  id        String   @id @default(uuid()) @db.Uuid
+  token     String   @unique
+  userId    String   @map("user_id") @db.Uuid
+  criadoEm  DateTime @default(now()) @map("criado_em")
+  expiracao DateTime
+  
+  user UsuariosPortal @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions_portal")
+}
+
+model DocumentosOperacoes {
+  id                   String   @id @default(uuid()) @db.Uuid
+  date                 DateTime @db.Date
+  cliente              String
+  dataDocumento        DateTime @map("data_documento") @db.Date
+  remessa              String
+  contrato             String
+  operacao             String
+  patrimonios          Json
+  documentacaoImagem   String   @map("documentacao_imagem") @db.Text
+  status               String
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+  
+  @@map("documentos_operacoes")
+}
+
+enum TipoUsuario {
+  admin
+  cliente
+  
+  @@map("tipo_usuario")
+}
