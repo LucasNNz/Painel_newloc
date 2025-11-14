@@ -1,0 +1,95 @@
+
+version: '3.8'
+
+services:
+  # =========================================
+  # PostgreSQL Database
+  # =========================================
+  db:
+    image: postgres:15-alpine
+    container_name: newloc_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres_secure_password_2024}
+      POSTGRES_DB: portal_newloc
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - appnet
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =========================================
+  # Next.js Application
+  # =========================================
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
+    container_name: newloc_web
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD:-postgres_secure_password_2024}@db:5432/portal_newloc?schema=public
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-generate_a_secure_secret_here_32chars}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-http://localhost:3000}
+      - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_key_here_minimum_32_characters}
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - appnet
+    volumes:
+      - ./nextjs_space/prisma:/app/prisma:ro
+    command: >
+      sh -c "
+        npx prisma migrate deploy &&
+        node server.js
+      "
+
+  # =========================================
+  # Adminer (Database Management - Opcional)
+  # =========================================
+  adminer:
+    image: adminer:latest
+    container_name: newloc_adminer
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+      ADMINER_DESIGN: nette
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - appnet
+    profiles:
+      - tools
+
+# =========================================
+# Volumes
+# =========================================
+volumes:
+  pgdata:
+    driver: local
+    name: newloc_pgdata
+
+# =========================================
+# Networks
+# =========================================
+networks:
+  appnet:
+    driver: bridge
+    name: newloc_network

@@ -1,0 +1,183 @@
+================================================================================
+                    PORTAL NEWLOC - NOTAS IMPORTANTES
+================================================================================
+
+📝 AJUSTE NECESSÁRIO NO next.config.js
+----------------------------------------
+
+Para que o Dockerfile funcione corretamente, é necessário ajustar o arquivo:
+nextjs_space/next.config.js
+
+Linha que precisa ser alterada:
+  output: process.env.NEXT_OUTPUT_MODE,
+
+Para:
+  output: process.env.NEXT_OUTPUT_MODE || 'standalone',
+
+Ou simplesmente:
+  output: 'standalone',
+
+Isso garante que o Next.js gere o build standalone necessário para o Docker.
+
+================================================================================
+
+🔐 SECRETS IMPORTANTES
+----------------------
+
+Antes do primeiro deploy, gere secrets seguros:
+
+# NEXTAUTH_SECRET
+openssl rand -base64 32
+
+# JWT_SECRET  
+openssl rand -base64 32
+
+# DB_PASSWORD
+openssl rand -base64 24
+
+E adicione no arquivo .env
+
+================================================================================
+
+📁 ARQUIVOS CRIADOS
+-------------------
+
+✅ Dockerfile                 - Build multi-stage otimizado
+✅ docker-compose.yml         - Orquestração completa
+✅ .dockerignore             - Otimização do build
+✅ .env.example              - Template de variáveis
+✅ nginx.conf                - Proxy reverso e SSL
+✅ deploy.sh                 - Script de deploy automatizado
+✅ backup.sh                 - Script de backup do banco
+✅ README.md                 - Documentação principal
+✅ API_DOCUMENTATION.md      - Referência completa da API
+✅ N8N_INTEGRATION.md        - Guia de integração n8n
+✅ DEPLOY_GUIDE.md           - Guia completo de deploy
+
+================================================================================
+
+🚀 PRÓXIMOS PASSOS
+------------------
+
+1. Ajustar next.config.js conforme descrito acima
+
+2. Configurar variáveis de ambiente:
+   cp .env.example .env
+   nano .env
+   (Preencher todos os valores)
+
+3. Executar o deploy:
+   chmod +x deploy.sh backup.sh
+   ./deploy.sh
+
+4. Configurar domínio:
+   - Apontar DNS para o servidor
+   - Instalar NGINX
+   - Obter certificado SSL com certbot
+
+5. Testar a aplicação:
+   curl http://localhost:3000/api/health
+
+6. Configurar backup automático:
+   crontab -e
+   Adicionar: 0 3 * * * cd /opt/portal_newloc && ./backup.sh
+
+================================================================================
+
+⚠️  IMPORTANTE PARA PRODUÇÃO
+----------------------------
+
+1. Alterar TODAS as senhas padrão
+2. Gerar novos secrets (nunca use os de exemplo)
+3. Configurar firewall (permitir apenas 80/443)
+4. Não expor Adminer publicamente
+5. Configurar SSL/HTTPS obrigatório
+6. Ativar backups automáticos
+7. Monitorar logs regularmente
+8. Manter Docker e sistema atualizados
+
+================================================================================
+
+📊 ESTRUTURA DE PASTAS APÓS BUILD
+----------------------------------
+
+/opt/portal_newloc/
+├── nextjs_space/              # Código-fonte
+│   ├── .next/                # Build do Next.js
+│   ├── node_modules/         # Dependências
+│   └── prisma/               # Schema e migrations
+├── backups/                   # Backups do banco (criado automaticamente)
+├── .env                       # Variáveis de ambiente (criar do .env.example)
+└── [arquivos de config]
+
+/var/lib/docker/volumes/
+└── newloc_pgdata/            # Dados do PostgreSQL
+
+================================================================================
+
+🔗 URLs IMPORTANTES
+-------------------
+
+Aplicação: http://localhost:3000 (desenvolvimento)
+Aplicação: https://app.newloc.com (produção)
+Adminer: http://localhost:8080 (opcional)
+Health: http://localhost:3000/api/health
+
+Login Admin:
+  Email: admin@newloc.com
+  Senha: Admin@123 (ALTERAR!)
+
+================================================================================
+
+📞 COMANDOS ÚTEIS
+-----------------
+
+# Ver logs
+docker compose logs -f
+
+# Status dos serviços
+docker compose ps
+
+# Reiniciar
+docker compose restart
+
+# Backup manual
+./backup.sh
+
+# Entrar no container
+docker compose exec web sh
+
+# Executar migrations
+docker compose exec web npx prisma migrate deploy
+
+# Popular dados
+docker compose exec web npx prisma db seed
+
+================================================================================
+
+🐛 TROUBLESHOOTING RÁPIDO
+-------------------------
+
+Problema: Aplicação não inicia
+Solução: docker compose logs web
+
+Problema: Erro de conexão com banco
+Solução: docker compose restart db
+
+Problema: NGINX 502 Bad Gateway
+Solução: curl http://localhost:3000/api/health && sudo systemctl restart nginx
+
+Problema: SSL não funciona
+Solução: sudo certbot renew --force-renewal
+
+Problema: Alto uso de memória
+Solução: docker system prune -a
+
+================================================================================
+
+Para mais detalhes, consulte:
+- DEPLOY_GUIDE.md
+- API_DOCUMENTATION.md
+- N8N_INTEGRATION.md
+
+================================================================================

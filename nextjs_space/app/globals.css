@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --newloc-yellow: #f4c400;
+    --newloc-yellow-hover: #e6b800;
+    --newloc-dark: #1a1a1a;
+    --newloc-darker: #0d0d0d;
+  }
+  
+  * {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+  }
+
+  html,
+  body {
+    max-width: 100vw;
+    overflow-x: hidden;
+    font-family: inherit;
+  }
+
+  body {
+    color: white;
+    background: black;
+    min-height: 100vh;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #1a1a1a;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #444;
+  }
+
+  /* Loading animations */
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Focus styles */
+  button:focus,
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: 2px solid var(--newloc-yellow);
+    outline-offset: 2px;
+  }
+
+  /* Smooth transitions */
+  * {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-[#f4c400] text-black font-semibold py-2 px-4 rounded-md hover:bg-yellow-500 transition-colors;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-700 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-600 transition-colors;
+  }
+  
+  .card {
+    @apply bg-gray-900 rounded-lg border border-gray-800 p-6;
+  }
+  
+  .card-hover {
+    @apply card hover:border-[#f4c400]/50 transition-all duration-300 hover:shadow-lg hover:shadow-[#f4c400]/10;
+  }
+  
+  .input {
+    @apply w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md focus:ring-2 focus:ring-[#f4c400] focus:border-transparent text-white placeholder-gray-400;
+  }
+  
+  .input-with-icon {
+    @apply input pl-10;
+  }
+}
